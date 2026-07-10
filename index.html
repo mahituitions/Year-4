@@ -89,10 +89,11 @@
 
         .feedback {
             margin-left: 10px;
-            font-size: 1.2rem;
+            font-size: 1rem;
             display: inline-block;
-            width: 25px;
-            text-align: center;
+            width: 90px;
+            text-align: left;
+            font-weight: bold;
         }
 
         .score-banner {
@@ -133,7 +134,6 @@
         <p class="subtitle">Year 4 Standard Units Exploration</p>
     </header>
 
-    <!-- STUDENT IDENTITY -->
     <div class="card">
         <h2>Welcome! Let's get started</h2>
         <div class="input-group">
@@ -142,42 +142,40 @@
         </div>
     </div>
 
-    <!-- TASK 3 -->
     <div class="card">
         <h2>Task 1: Is a 'Metre' Best? 🏃‍♂️</h2>
         <div class="instruction-box">
-            In New Zealand, the <strong>metre (m)</strong> is the basic standard unit for measuring length[cite: 1]. It's about the length of one big stride[cite: 1]. 
-            Choose <strong>YES</strong> if a metre ruler is the best tool, or <strong>NO</strong> if the object is too tiny or the distance is much too long[cite: 1].
+            In New Zealand, the <strong>metre (m)</strong> is the basic standard unit for measuring length. 
+            Choose <strong>YES</strong> if a metre ruler is the best tool, or <strong>NO</strong> if the object is too tiny or the distance is much too long. 
+            <br><em>(Maximum 2 attempts per question!)</em>
         </div>
         <div id="questions-t3"></div>
         <div class="score-banner">
-            <span>Task 1 Progress:</span>
+            <span>Task 1 Progress (Current Score):</span>
             <span id="score-t3">Score: 0 / 10</span>
         </div>
     </div>
 
-    <!-- TASK 4 -->
     <div class="card">
         <h2>Task 2: Choosing the Perfect Metric Unit 🗺️</h2>
         <div class="instruction-box">
-            Different objects need different standard units[cite: 1]. Select the best match from the dropdown box:
-            <strong>mm</strong> (very small/thin items), <strong>cm</strong> (hand-sized items), <strong>m</strong> (rooms/fields), or <strong>km</strong> (between cities/large distances)[cite: 1].
+            Different objects need different standard units. Select the best match from the dropdown box:
+            <strong>mm</strong>, <strong>cm</strong>, <strong>m</strong>, or <strong>km</strong>.
+            <br><em>(Maximum 2 attempts per question!)</em>
         </div>
         <div id="questions-t4"></div>
         <div class="score-banner">
-            <span>Task 2 Progress:</span>
+            <span>Task 2 Progress (Current Score):</span>
             <span id="score-t4">Score: 0 / 10</span>
         </div>
     </div>
 
-    <!-- SUBMIT SYSTEM -->
     <div style="margin-bottom: 40px;">
         <button id="submit-btn" class="btn-submit" disabled onclick="submitResults()">Submit Answers to Tutor</button>
     </div>
 </div>
 
 <script>
-    // EXPANDED QUESTION DATABASES (Pulled directly from curriculum sheet specifications)
     const t3Data = [
         { q: "The height of a school building.", a: "YES" },
         { q: "The thickness of an exercise book.", a: "NO" },
@@ -205,10 +203,15 @@
     ];
 
     // REPLACE THIS URL with your Google Web App URL once configured
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZbkYy0a9HhX1WBy1AdGIoeYqDy9XtrtABLqMLtF0_2oucqwYJtK7BjJGeC5SwIs0PBw/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxrE2kL9lYiNAEGmrcqRQzN0LV92qgaW3LmlGkqQtCC3zXOxAESJd_sRSOOQkERSl6taA/exec";
 
-    let t3Score = 0;
-    let t4Score = 0;
+    // Detailed tracking object
+    let trackingData = {
+        t3Attempts: Array(10).fill(0),
+        t4Attempts: Array(10).fill(0),
+        t3FirstAttempts: {},
+        t4FirstAttempts: {}
+    };
 
     function buildQuiz(containerId, data, type) {
         const container = document.getElementById(containerId);
@@ -223,7 +226,7 @@
             row.innerHTML = `
                 <div class="question-text">${idx + 1}. ${item.q}</div>
                 <div class="question-input">
-                    <select class="quiz-select" data-ans="${item.a}" data-type="${type}" onchange="gradeAnswer(this)">${options}</select>
+                    <select class="quiz-select" data-index="${idx}" data-ans="${item.a}" data-type="${type}" onchange="gradeAnswer(this)">${options}</select>
                     <span class="feedback"></span>
                 </div>
             `;
@@ -234,33 +237,63 @@
     function gradeAnswer(el) {
         const selected = el.value;
         const correct = el.getAttribute('data-ans');
+        const type = el.getAttribute('data-type');
+        const idx = parseInt(el.getAttribute('data-index'));
         const feedback = el.nextElementSibling;
 
-        if (selected === correct) {
-            feedback.innerHTML = "✅";
-        } else if (selected === "") {
+        if (selected === "") {
             feedback.innerHTML = "";
+            return;
+        }
+
+        // Advance attempt counter
+        if (type === 't3') {
+            trackingData.t3Attempts[idx]++;
+            var currentAttempt = trackingData.t3Attempts[idx];
+            if (trackingData.t3FirstAttempts[idx] === undefined) {
+                trackingData.t3FirstAttempts[idx] = (selected === correct);
+            }
         } else {
-            feedback.innerHTML = "❌";
+            trackingData.t4Attempts[idx]++;
+            var currentAttempt = trackingData.t4Attempts[idx];
+            if (trackingData.t4FirstAttempts[idx] === undefined) {
+                trackingData.t4FirstAttempts[idx] = (selected === correct);
+            }
+        }
+
+        // Process Feedback and Locking rules
+        if (selected === correct) {
+            feedback.innerHTML = "✅ Correct!";
+            feedback.style.color = "#2ecc71";
+            el.disabled = true; // Lock immediately if correct
+        } else {
+            if (currentAttempt >= 2) {
+                feedback.innerHTML = "❌ Locked";
+                feedback.style.color = "#e74c3c";
+                el.disabled = true; // Hard limit at 2 attempts
+            } else {
+                feedback.innerHTML = "❌ Try again";
+                feedback.style.color = "#f39c12";
+            }
         }
         
         calculateScores();
     }
 
     function calculateScores() {
-        t3Score = document.querySelectorAll('#questions-t3 select').filter(s => s.value === s.getAttribute('data-ans')).length;
-        t4Score = document.querySelectorAll('#questions-t4 select').filter(s => s.value === s.getAttribute('data-ans')).length;
+        let t3CurrentScore = 0;
+        let t4CurrentScore = 0;
 
-        // Custom filter array logic for older browser engine support safely inside standard query selectors
-        let t3Correct = 0, t4Correct = 0;
-        document.querySelectorAll('#questions-t3 select').forEach(s => { if(s.value === s.getAttribute('data-ans')) t3Correct++; });
-        document.querySelectorAll('#questions-t4 select').forEach(s => { if(s.value === s.getAttribute('data-ans')) t4Correct++; });
-        
-        t3Score = t3Correct;
-        t4Score = t4Correct;
+        document.querySelectorAll('#questions-t3 select').forEach(s => {
+            if (s.value === s.getAttribute('data-ans')) t3CurrentScore++;
+        });
 
-        document.getElementById('score-t3').innerText = `Score: ${t3Score} / ${t3Data.length}`;
-        document.getElementById('score-t4').innerText = `Score: ${t4Score} / ${t4Data.length}`;
+        document.querySelectorAll('#questions-t4 select').forEach(s => {
+            if (s.value === s.getAttribute('data-ans')) t4CurrentScore++;
+        });
+
+        document.getElementById('score-t3').innerText = `Score: ${t3CurrentScore} / ${t3Data.length}`;
+        document.getElementById('score-t4').innerText = `Score: ${t4CurrentScore} / ${t4Data.length}`;
         
         validateForm();
     }
@@ -268,32 +301,40 @@
     function validateForm() {
         const name = document.getElementById('student-name').value.trim();
         const btn = document.getElementById('submit-btn');
-        // Enable submit button only if name field is completed
         btn.disabled = name.length < 2;
     }
 
     function submitResults() {
         const name = document.getElementById('student-name').value.trim();
-        const totalScore = t3Score + t4Score;
-        const maxScore = t3Data.length + t4Data.length;
-        const percent = Math.round((totalScore / maxScore) * 100);
+        
+        let t3Final = 0, t4Final = 0;
+        document.querySelectorAll('#questions-t3 select').forEach(s => { if (s.value === s.getAttribute('data-ans')) t3Final++; });
+        document.querySelectorAll('#questions-t4 select').forEach(s => { if (s.value === s.getAttribute('data-ans')) t4Final++; });
+
+        let t3First = 0, t4First = 0;
+        Object.values(trackingData.t3FirstAttempts).forEach(val => { if(val) t3First++; });
+        Object.values(trackingData.t4FirstAttempts).forEach(val => { if(val) t4First++; });
+
+        // Calculate total attempts across both tasks
+        let totalAttemptsMade = trackingData.t3Attempts.reduce((a, b) => a + b, 0) + trackingData.t4Attempts.reduce((a, b) => a + b, 0);
 
         const btn = document.getElementById('submit-btn');
         btn.disabled = true;
         btn.innerText = "Submitting scores...";
 
-        if(GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_SCRIPT")) {
-            alert(`Great job ${name}! You scored ${totalScore}/${maxScore} (${percent}%).\n\n(Tutor Note: To save this automatically to a spreadsheet, update the GOOGLE_SCRIPT_URL variable in the code!)`);
+        if (GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_SCRIPT")) {
+            alert(`Great job ${name}!\n\nFirst-Attempt Score: ${t3First + t4First}/20\nFinal Score: ${t3Final + t4Final}/20\nTotal Attempts Tried: ${totalAttemptsMade}`);
             btn.innerText = "Submitted Successfully!";
             return;
         }
 
-        // Construct target data payload
         const payload = new URLSearchParams({
             "name": name,
-            "task3": `${t3Score}/${t3Data.length}`,
-            "task4": `${t4Score}/${t4Data.length}`,
-            "total": `${totalScore}/${maxScore} (${percent}%)`
+            "t3First": `${t3First}/${t3Data.length}`,
+            "t3Final": `${t3Final}/${t3Data.length}`,
+            "t4First": `${t4First}/${t4Data.length}`,
+            "t4Final": `${t4Final}/${t4Data.length}`,
+            "totalAttempts": totalAttemptsMade
         });
 
         fetch(GOOGLE_SCRIPT_URL, {
@@ -306,13 +347,12 @@
             btn.innerText = "Submitted! Well Done 🎉";
         })
         .catch(err => {
-            alert("Submission error. Please show your screen scores directly to your tutor.");
+            alert("Submission error. Please notify your tutor.");
             btn.removeAttribute('disabled');
             btn.innerText = "Try Submitting Again";
         });
     }
 
-    // Initialize Quizzes on Page Boot
     buildQuiz('questions-t3', t3Data, 't3');
     buildQuiz('questions-t4', t4Data, 't4');
 </script>
