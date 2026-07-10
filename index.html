@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 2 Measurement Exploration</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --secondary: #2ecc71;
+            --background: #f8f9fa;
+            --text: #2c3e50;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background: linear-gradient(135deg, var(--primary), #357abd);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; font-size: 2.5rem; }
+        p.subtitle { margin: 5px 0 0 0; opacity: 0.9; font-size: 1.1rem; }
+
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: #ebeef1;
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: none;
+        }
+
+        .task-card.active { display: block; }
+
+        h2 { color: var(--primary); border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
+
+        .instruction-box {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th { background-color: #f2f2f2; color: var(--text); }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background-color: var(--secondary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background-color: #27ae60; }
+
+        .question-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-text { flex: 2; font-size: 1.05rem; }
+        .question-input { flex: 1; margin-left: 20px; }
+
+        .feedback {
+            margin-left: 10px;
+            font-weight: bold;
+            display: inline-block;
+            width: 25px;
+        }
+        .correct { color: #2ecc71; }
+        .incorrect { color: #e74c3c; }
+
+        .score-display {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: right;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Let's Explore Measurement! 📏</h1>
+        <p class="subtitle">Interactive Mathematics Portal for Year 4</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(0)">Task 1: Foot Steps</button>
+        <button class="tab-btn" onclick="switchTab(1)">Task 2: DIY Ruler</button>
+        <button class="tab-btn" onclick="switchTab(2)">Task 3: Metre Hunt</button>
+        <button class="tab-btn" onclick="switchTab(3)">Task 4: Unit Matcher</button>
+    </div>
+
+    <div id="task1" class="task-card active">
+        <h2>Task 1: Measuring with your Feet 👟</h2>
+        <div class="instruction-box">
+            In the past, people used their own feet to measure lengths! Find 4 different paths around you. First, guess (estimate) how many foot-steps it will take, then walk it out and count them!
+        </div>
+        <table id="table1">
+            <thead>
+                <tr>
+                    <th>Starting Point</th>
+                    <th>Finishing Point</th>
+                    <th>Estimate Distance (feet)</th>
+                    <th>Measured Distance (feet)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" placeholder="e.g., Brick Wall"></td>
+                    <td><input type="text" placeholder="e.g., Tennis Court"></td>
+                    <td><input type="text" placeholder="e.g., 30 feet"></td>
+                    <td><input type="text" placeholder="e.g., 32 feet"></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn" onclick="addRow('table1')">+ Add Row</button>
+        
+        <h3>Reflection Question:</h3>
+        <p>Do you think it's a good idea to use people's actual feet for measuring? Why or why not?</p>
+        <textarea style="width:100%; height:80px; padding:10px; border-radius:5px;" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div id="task2" class="task-card">
+        <h2>Task 2: Make & Use Your Own Ruler 📐</h2>
+        <div class="instruction-box">
+            Follow your teacher's instructions to trace and cut out your custom foot-ruler, folding it into 8 equal 'units' or 'hops'. Give your unique unit a fun name, then estimate and measure 5 objects in the room!
+        </div>
+        <p>What is your unique unit called? <input type="text" id="unit-name" placeholder="e.g., hops, blocks" style="width:200px; display:inline-block;"></p>
+        <table id="table2">
+            <thead>
+                <tr>
+                    <th>What am I measuring?</th>
+                    <th>Estimate Length</th>
+                    <th>Measured Length</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" placeholder="e.g., Longest side of my desk"></td>
+                    <td><input type="text" placeholder="30 'units'"></td>
+                    <td><input type="text" placeholder="?"></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn" onclick="addRow('table2')">+ Add Row</button>
+    </div>
+
+    <div id="task3" class="task-card">
+        <h2>Task 3: Is a 'Metre' Best? 🏃‍♂️</h2>
+        <div class="instruction-box">
+            A <strong>metre</strong> is the basic unit for measuring length in the metric system. It is about one long stride. Choose <strong>YES</strong> if a metre ruler is the best tool to measure these, or <strong>NO</strong> if it is too small or too big.
+        </div>
+        <div id="questions-t3"></div>
+        <div class="score-display" id="score-t3"></div>
+    </div>
+
+    <div id="task4" class="task-card">
+        <h2>Task 4: Choosing the Perfect Metric Unit 🗺️</h2>
+        <div class="instruction-box">
+            Pick the absolute best metric unit for each item: 
+            <strong>mm</strong> (tiny), <strong>cm</strong> (small), <strong>m</strong> (medium/human scale), or <strong>km</strong> (very long distances).
+        </div>
+        <div id="questions-t4"></div>
+        <div class="score-display" id="score-t4"></div>
+    </div>
+</div>
+
+<script>
+    function switchTab(index) {
+        const cards = document.querySelectorAll('.task-card');
+        const tabs = document.querySelectorAll('.tab-btn');
+        cards.forEach((card, i) => {
+            card.classList.toggle('active', i === index);
+            tabs[i].classList.toggle('active', i === index);
+        });
+    }
+
+    function addRow(tableId) {
+        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        const newRow = table.rows[0].cloneNode(true);
+        const inputs = newRow.getElementsByTagName('input');
+        for (let i = 0; i < inputs.length; i++) {
+            inputs[i].value = '';
+        }
+        table.appendChild(newRow);
+    }
+
+    // Task 3 Data & Logic
+    const t3Data = [
+        { q: "The height of a building.", a: "YES" },
+        { q: "The thickness of an exercise book.", a: "NO" },
+        { q: "The distance between New Zealand and Australia.", a: "NO" },
+        { q: "The length of a rugby field.", a: "YES" },
+        { q: "The distance of a cross-country race.", a: "NO" },
+        { q: "The width of a swimming pool.", a: "YES" },
+        { q: "The length of a pencil.", a: "NO" },
+        { q: "The height of a door.", a: "YES" }
+    ];
+
+    // Task 4 Data & Logic
+    const t4Data = [
+        { q: "The thickness of a book?", a: "mm" },
+        { q: "The length of a soccer field?", a: "m" },
+        { q: "The distance between two cities?", a: "km" },
+        { q: "The height of a lamp post?", a: "m" },
+        { q: "Your height?", a: "cm" },
+        { q: "The width of the classroom?", a: "m" },
+        { q: "The distance of a running race?", a: "km" },
+        { q: "The thickness of a pencil?", a: "mm" },
+        { q: "The length of your longest finger?",   a: "cm" },
+        { q: "The height of a tree?", a: "m" }
+    ];
+
+    function renderQuiz(containerId, data, type) {
+        const container = document.getElementById(containerId);
+        data.forEach((item, index) => {
+            const row = document.createElement('div');
+            row.className = 'question-row';
+            
+            let optionsHtml = '';
+            if (type === 't3') {
+                optionsHtml = `<select onchange="checkAnswer(this, '${item.a}', '${type}')">
+                    <option value="">-- Choose --</option>
+                    <option value="YES">Yes, use metres</option>
+                    <option value="NO">No, use something else</option>
+                </select>`;
+            } else {
+                optionsHtml = `<select onchange="checkAnswer(this, '${item.a}', '${type}')">
+                    <option value="">-- Choose Unit --</option>
+                    <option value="mm">millimetre (mm)</option>
+                    <option value="cm">centimetre (cm)</option>
+                    <option value="m">metre (m)</option>
+                    <option value="km">kilometre (km)</option>
+                </select>`;
+            }
+
+            row.innerHTML = `
+                <div class="question-text">${index + 1}. ${item.q}</div>
+                <div class="question-input">${optionsHtml}<span class="feedback"></span></div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    function checkAnswer(selectElement, correctAnswer, type) {
+        const feedback = selectElement.nextElementSibling;
+        if (selectElement.value === correctAnswer) {
+            feedback.innerHTML = '✅';
+            feedback.className = 'feedback correct';
+        } else if (selectElement.value === '') {
+            feedback.innerHTML = '';
+        } else {
+            feedback.innerHTML = '❌';
+            feedback.className = 'feedback incorrect';
+        }
+        updateScore(type);
+    }
+
+    function updateScore(type) {
+        const container = document.getElementById(`questions-${type}`);
+        const total = container.querySelectorAll('select').length;
+        const correct = container.querySelectorAll('.correct').length;
+        document.getElementById(`score-${type}`).innerText = `Score: ${correct} / ${total}`;
+    }
+
+    // Initialize Quizzes
+    renderQuiz('questions-t3', t3Data, 't3');
+    renderQuiz('questions-t4', t4Data, 't4');
+</script>
+
+</body>
+</html>
