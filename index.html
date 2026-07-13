@@ -81,7 +81,6 @@
         .question-text { flex: 2; font-size: 1.05rem; }
         .question-input { flex: 1; margin-left: 20px; display: flex; align-items: center; justify-content: flex-end; }
         
-        /* Updated design for clean numeric entry */
         input.quiz-num-input { width: 120px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; text-align: center; font-size: 1rem; }
         select.quiz-select { width: 180px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
 
@@ -127,7 +126,7 @@
         <button class="btn-back" onclick="showDashboard()">⬅ Back to Dashboard</button>
         <div class="card">
             <h2 id="title-mod1">Module 1</h2>
-            <div class="instruction-box">Answer all 20 shuffled questions below, then click submit to verify your score.</div>
+            <div class="instruction-box">Read each story carefully and pick the best matching unit of measurement!</div>
             <div id="questions-mod1"></div>
             <button id="submit-mod1" class="btn-submit" onclick="submitModule('mod1')">Submit Answers</button>
         </div>
@@ -137,7 +136,7 @@
         <button class="btn-back" onclick="showDashboard()">⬅ Back to Dashboard</button>
         <div class="card">
             <h2 id="title-mod2">Module 2</h2>
-            <div class="instruction-box">Type the correct converted conversion value into each box.</div>
+            <div class="instruction-box">Solve these length puzzle conversions. Type the missing matching numbers into the boxes.</div>
             <div id="questions-mod2"></div>
             <button id="submit-mod2" class="btn-submit" onclick="submitModule('mod2')">Submit Answers</button>
         </div>
@@ -145,26 +144,42 @@
 </div>
 
 <script>
-    // Paste your updated Web App URL right here
+    // Paste your exact deployment Google Web App URL here
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxuECD6Kpd7u8Z8kMROXx-Yejq_se2RDb4tyB0HFeRsjhmpsG3rAP7Md_-BDnS3L-FO/exec";
-
-    // Static pool for Module 1 (will be dynamically scrambled)
-    const baseMod1Data = [
-        { q: "The height of a school building best measured in metres?", a: "YES" }, { q: "The thickness of an exercise book best measured in metres?", a: "NO" },
-        { q: "The distance between New Zealand and Australia best measured in metres?", a: "NO" }, { q: "The length of a rugby field best measured in metres?", a: "YES" },
-        { q: "The distance of a cross-country running race best measured in metres?", a: "NO" }, { q: "The width of a swimming pool best measured in metres?", a: "YES" },
-        { q: "The length of a wooden pencil best measured in metres?", a: "NO" }, { q: "The height of a classroom door best measured in metres?", a: "YES" },
-        { q: "The distance all the way around the school grounds best measured in metres?", a: "NO" }, { q: "The height of a standard playground slide best measured in metres?", a: "YES" },
-        { q: "What is the best unit for the thickness of a reading book?", a: "mm" }, { q: "What is the best unit for the length of a soccer field?", a: "m" },
-        { q: "What is the best unit for the distance between two far-away cities?", a: "km" }, { q: "What is the best unit for the height of a street lamp post?", a: "m" },
-        { q: "What is the best unit for your exact body height?", a: "cm" }, { q: "What is the best unit for the total width of your classroom?", a: "m" },
-        { q: "What is the best unit for the distance of an Olympic running track?", a: "m" }, { q: "What is the best unit for the thickness of a graphite pencil?", a: "mm" },
-        { q: "What is the best unit for the length of your longest finger?", a: "cm" }, { q: "What is the best unit for the height of a mature kauri tree?", a: "m" }
-    ];
 
     let confirmedStudentName = "";
     let activeAttemptNumber = 1;
-    let currentlyRenderedQuestions = []; // Keeps track of active scrambled order values
+    let currentlyRenderedQuestions = []; 
+
+    // Year 4 Word-Problem Templates for Module 1
+    const mmScenarios = [
+        "A tiny ladybird is crawling across an autumn leaf. What unit should we use to find its length?",
+        "Look closely at the tip of your sharp pencil lead. Which metric unit is best for its tiny thickness?",
+        "Chloe is measuring the thickness of a single clear plastic ruler. What unit should she use?",
+        "An ant is standing on top of an apple seed. Which measurement unit best captures the ant's size?",
+        "Leo wants to measure how thick a single coin from his pocket is. What unit fits best?"
+    ];
+    const cmScenarios = [
+        "You want to find out the exact length of a brand new crayon. Which metric unit should you use?",
+        "Mia is measuring the long side of a standard A4 reading book sheet. What unit fits best?",
+        "Jack wants to see how long his new pair of scissors is. Which unit should he choose?",
+        "Think about the length of your longest finger. What unit is most practical to measure it?",
+        "Sophia wants to find the exact length of a small chocolate bar. Which metric unit is best?"
+    ];
+    const mScenarios = [
+        "Your teacher asks you to measure the distance from the front whiteboard to the back wall of the classroom. What unit is best?",
+        "Liam wants to measure the total length of the big playground slide outside. Which metric unit should he use?",
+        "A large swimming pool is used for school racing. What unit describes how long the pool lanes are?",
+        "How tall is a standard school classroom door frame? Choose the best unit to measure it.",
+        "A regular soccer or rugby field stretches far across the park. What unit matches its total length?"
+    ];
+    const kmScenarios = [
+        "An airplane flies high in the sky between two distant cities. What unit measures this trip distance?",
+        "A cross-country running path goes all the way through a forest track. What unit measures the course length?",
+        "You are going on a road trip with your family to a holiday spot hours away. What unit measures the road distance?",
+        "Imagine traveling all the way from New Zealand across the ocean to Australia. What unit fits this map distance?",
+        "A long marathon running race circles around an entire town city center. What unit describes this race?"
+    ];
 
     function verifyStudentRoster() {
         const nameInput = document.getElementById('student-name').value.trim();
@@ -210,9 +225,8 @@
                 return;
             }
             
-            document.getElementById(`title-${modId}`).innerText = `${modId === 'mod1' ? "Module 1: Units Intro" : "Module 2: Length Conversions"} - Attempt #${activeAttemptNumber} of 3`;
+            document.getElementById(`title-${modId}`).innerText = `${modId === 'mod1' ? "Module 1: Choosing Metric Units" : "Module 2: Length Conversions"} - Attempt #${activeAttemptNumber} of 3`;
             
-            // Build fresh randomized test questions right when they click into it!
             generateAndBuildQuiz(modId);
             openModule(modId);
         }).catch(() => {
@@ -223,74 +237,95 @@
         });
     }
 
+    // Dynamic Engine generating procedurally unique tasks every single run
     function generateAndBuildQuiz(modId) {
         currentlyRenderedQuestions = [];
         const container = document.getElementById(`questions-${modId}`);
         container.innerHTML = "";
 
         if (modId === 'mod1') {
-            // Scramble Module 1 questions
-            let shuffled = [...baseMod1Data].sort(() => Math.random() - 0.5);
-            currentlyRenderedQuestions = shuffled;
+            // Pick a completely random sample combination from our scenarios
+            let itemsPool = [];
+            
+            // Collect balanced questions
+            for(let i=0; i<5; i++) {
+                itemsPool.push({ q: mmScenarios[Math.floor(Math.random() * mmScenarios.length)], a: "mm" });
+                itemsPool.push({ q: cmScenarios[Math.floor(Math.random() * cmScenarios.length)], a: "cm" });
+                itemsPool.push({ q: mScenarios[Math.floor(Math.random() * mScenarios.length)], a: "m" });
+                itemsPool.push({ q: kmScenarios[Math.floor(Math.random() * kmScenarios.length)], a: "km" });
+            }
 
-            shuffled.forEach((item, idx) => {
+            // Scramble completely so the answer pattern changes
+            itemsPool.sort(() => Math.random() - 0.5);
+            currentlyRenderedQuestions = itemsPool;
+
+            currentlyRenderedQuestions.forEach((item, idx) => {
                 const row = document.createElement('div');
                 row.className = 'question-row';
-                
-                // Keep dropdown choices simple and error-proof
-                let isYesNo = item.q.includes("best measured in metres");
-                let options = `<option value="">-- Select --</option>`;
-                if (isYesNo) {
-                    options += `<option value="YES">Yes, use metres</option><option value="NO">No, use another unit</option>`;
-                } else {
-                    options += `<option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option><option value="km">km</option>`;
-                }
-
+                let options = `
+                    <option value="">-- Choose Unit --</option>
+                    <option value="mm">mm (millimetre)</option>
+                    <option value="cm">cm (centimetre)</option>
+                    <option value="m">m (metre)</option>
+                    <option value="km">km (kilometre)</option>
+                `;
                 row.innerHTML = `
-                    <div class="question-text">${idx + 1}. ${item.q}</div>
-                    <div class="question-input">
-                        <select class="quiz-select">${options}</select>
-                    </div>
+                    <div class="question-text"><strong>Q${idx + 1}.</strong> ${item.q}</div>
+                    <div class="question-input"><select class="quiz-select">${options}</select></div>
                 `;
                 container.appendChild(row);
             });
         } else {
-            // Procedurally generate brand-new random numbers for Module 2 every attempt!
-            let types = ["m_to_mm", "m_to_cm", "mm_to_cm", "m_to_km"];
-            
+            // Procedural variations generator for conversion tasks
+            let patterns = ["m_to_mm", "m_to_cm", "mm_to_cm", "m_to_km"];
+            let wordPhrases = [
+                "A long piece of blue string is exactly {X} metres long. How many millimetres is that?",
+                "An athlete jumps a distance of {X} metres. Express this jumping value in centimetres.",
+                "A ladybird crawled {X} millimetres up a garden branch. Convert this distance to centimetres.",
+                "The school running club completed a path tracking {X} metres long. How many kilometres is that?",
+                "Solve the measurement missing puzzle: {X}m = _____ cm",
+                "Fill in the empty conversion blank space: {X}mm = _____ cm",
+                "Can you change {X}m directly into millimetres?",
+                "Change this value into kilometres: {X}m"
+            ];
+
             for (let i = 0; i < 20; i++) {
-                let currentType = types[i % types.length];
+                let currentPattern = patterns[i % patterns.length];
                 let questionText = "";
                 let correctAnswer = "";
-                let randomNum = Math.floor(Math.random() * 9) + 1; // Creates numbers 1 to 9
+                let baseRand = Math.floor(Math.random() * 9) + 1; // 1 to 9
 
-                if (currentType === "m_to_mm") {
-                    questionText = `Convert: ${randomNum}m = _____ mm`;
-                    correctAnswer = (randomNum * 1000).toString();
-                } else if (currentType === "m_to_cm") {
-                    questionText = `Convert: ${randomNum}m = _____ cm`;
-                    correctAnswer = (randomNum * 100).toString();
-                } else if (currentType === "mm_to_cm") {
-                    let mmVal = randomNum * 10;
-                    questionText = `Convert: ${mmVal}mm = _____ cm`;
-                    correctAnswer = randomNum.toString();
-                } else if (currentType === "m_to_km") {
-                    let mVal = randomNum * 1000;
-                    questionText = `Convert: ${mVal}m = _____ km`;
-                    correctAnswer = randomNum.toString();
+                if (currentPattern === "m_to_mm") {
+                    let textTemplate = wordPhrases[Math.random() > 0.5 ? 0 : 6];
+                    questionText = textTemplate.replace("{X}", baseRand);
+                    correctAnswer = (baseRand * 1000).toString();
+                } else if (currentPattern === "m_to_cm") {
+                    let textTemplate = wordPhrases[Math.random() > 0.5 ? 1 : 4];
+                    questionText = textTemplate.replace("{X}", baseRand);
+                    correctAnswer = (baseRand * 100).toString();
+                } else if (currentPattern === "mm_to_cm") {
+                    let mmVal = baseRand * 10;
+                    let textTemplate = wordPhrases[Math.random() > 0.5 ? 2 : 5];
+                    questionText = textTemplate.replace("{X}", mmVal);
+                    correctAnswer = baseRand.toString();
+                } else if (currentPattern === "m_to_km") {
+                    let mVal = baseRand * 1000;
+                    let textTemplate = wordPhrases[Math.random() > 0.5 ? 3 : 7];
+                    questionText = textTemplate.replace("{X}", mVal);
+                    correctAnswer = baseRand.toString();
                 }
 
                 currentlyRenderedQuestions.push({ q: questionText, a: correctAnswer });
             }
 
-            // Shuffle the generated conversion questions
+            // Shuffle conversion puzzles
             currentlyRenderedQuestions.sort(() => Math.random() - 0.5);
 
             currentlyRenderedQuestions.forEach((item, idx) => {
                 const row = document.createElement('div');
                 row.className = 'question-row';
                 row.innerHTML = `
-                    <div class="question-text">${idx + 1}. ${item.q}</div>
+                    <div class="question-text"><strong>Q${idx + 1}.</strong> ${item.q}</div>
                     <div class="question-input">
                         <input type="text" class="quiz-num-input" placeholder="Type number...">
                     </div>
@@ -308,7 +343,7 @@
     function showDashboard() {
         document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
         document.getElementById('view-dashboard').classList.add('active');
-        verifyStudentRoster(); // Auto-reloads fresh dashboard profile configs
+        verifyStudentRoster(); 
     }
 
     function submitModule(modId) {
@@ -318,7 +353,6 @@
         let correctAnswersCount = 0;
         let unansweredFound = false;
 
-        // Extract student inputs cleanly depending on the active input layout
         const inputs = document.querySelectorAll(`#questions-${modId} .quiz-select, #questions-${modId} .quiz-num-input`);
         
         inputs.forEach((input, idx) => {
