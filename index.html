@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Year 4 Measurement Practice Portal</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --secondary: #2ecc71;
+            --background: #f8f9fa;
+            --text: #2c3e50;
+            --card-bg: #ffffff;
+            --accent: #e67e22;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        header {
+            text-align: center;
+            padding: 25px 0;
+            background: linear-gradient(135deg, var(--primary), #357abd);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; font-size: 2.2rem; }
+        p.subtitle { margin: 5px 0 0 0; opacity: 0.9; font-size: 1.1rem; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        h2 { color: var(--primary); border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; margin-top: 0; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .module-card {
+            background: #fff;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+            display: none; 
+        }
+
+        .module-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .module-card h3 { margin-top: 0; color: var(--text); }
+        
+        .badge { background: var(--accent); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+        .view-panel { display: none; }
+        .view-panel.active { display: block; }
+
+        .btn-back { background: #7f8c8d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; font-weight: bold; }
+        .btn-login { background-color: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+
+        .instruction-box { background-color: #e8f4fd; border-left: 5px solid var(--primary); padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 0.95rem; }
+        .question-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .question-text { flex: 2; font-size: 1.05rem; }
+        .question-input { flex: 1; margin-left: 20px; display: flex; align-items: center; justify-content: flex-end; }
+        select.quiz-select { width: 180px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
+
+        .feedback { margin-left: 10px; font-size: 1rem; display: inline-block; width: 110px; text-align: left; font-weight: bold; }
+        .score-banner { background: #f1f2f6; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 1.1rem; font-weight: bold; color: var(--primary); display: flex; flex-direction: column; gap: 5px; }
+        .btn-submit { background-color: var(--secondary); color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; width: 100%; margin-top: 20px; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2); }
+        .btn-submit:disabled { background-color: #bdc3c7; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Measurement Masterclass 📏</h1>
+        <p class="subtitle">Interactive Mathematics Dashboard</p>
+    </header>
+
+    <div id="view-dashboard" class="view-panel active">
+        <div class="card" id="signin-box">
+            <h2>Welcome student! Let's Sign In</h2>
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; font-weight:bold; margin-bottom:5px;" for="student-name">Enter your Full Name:</label>
+                <input type="text" id="student-name" placeholder="Type your name exactly as registered..." style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc; font-size:1rem;">
+                <button class="btn-login" onclick="verifyStudentRoster()">Verify & Load My Tasks</button>
+            </div>
+        </div>
+
+        <div id="portal-area" style="display: none;">
+            <h2 id="welcome-message">Your Tasks</h2>
+            <div class="grid">
+                <div class="module-card" id="card-mod1" onclick="openModule('mod1')">
+                    <span class="badge">Module 1</span>
+                    <h3>Metric Units Intro</h3>
+                    <p>Learn to choose standard units like mm, cm, m, and km.</p>
+                </div>
+                <div class="module-card" id="card-mod2" onclick="openModule('mod2')">
+                    <span class="badge">Module 2</span>
+                    <h3>Unit Conversions</h3>
+                    <p>Master converting m to mm, m to cm, mm to cm, and m to km.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-mod1" class="view-panel">
+        <button class="btn-back" onclick="showDashboard()">⬅ Back to Dashboard</button>
+        <div class="card">
+            <h2>Module 1: Metric Units Selection</h2>
+            <div class="instruction-box">Complete the challenge by picking the most accurate length unit. <strong>Max 3 attempts per question!</strong></div>
+            <div id="questions-mod1"></div>
+            <div class="score-banner">
+                <span id="score-live-mod1">Current Correct Answers: 0 / 20</span>
+            </div>
+            <button id="submit-mod1" class="btn-submit" onclick="submitModule('mod1')">Submit Module 1 Scores</button>
+        </div>
+    </div>
+
+    <div id="view-mod2" class="view-panel">
+        <button class="btn-back" onclick="showDashboard()">⬅ Back to Dashboard</button>
+        <div class="card">
+            <h2>Module 2: Length Conversions</h2>
+            <div class="instruction-box">Convert between metric length units. <strong>Max 3 attempts per question!</strong></div>
+            <div id="questions-mod2"></div>
+            <div class="score-banner">
+                <span id="score-live-mod2">Current Correct Answers: 0 / 20</span>
+            </div>
+            <button id="submit-mod2" class="btn-submit" onclick="submitModule('mod2')">Submit Module 2 Scores</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // CRITICAL: Replace this text string with your exact Google Web App URL 
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDoZZzIzo1oudUhEkkL2Dtk-ZbackjkbRmdQX7qeDqUrURtlfyjJyQR6K1-P056kp8/exec";
+
+    const mod1Data = [
+        { q: "The height of a school building.", a: "YES" }, { q: "The thickness of an exercise book.", a: "NO" },
+        { q: "The distance between New Zealand and Australia.", a: "NO" }, { q: "The length of a rugby field.", a: "YES" },
+        { q: "The distance of a cross-country running race.", a: "NO" }, { q: "The width of a swimming pool.", a: "YES" },
+        { q: "The length of a wooden pencil.", a: "NO" }, { q: "The height of a classroom door.", a: "YES" },
+        { q: "The distance all the way around the school grounds.", a: "NO" }, { q: "The length of a playground slide.", a: "YES" },
+        { q: "The thickness of a reading book?", a: "mm" }, { q: "The length of a soccer field?", a: "m" },
+        { q: "The distance between two far-away cities?", a: "km" }, { q: "The height of a street lamp post?", a: "m" },
+        { q: "Your exact body height?", a: "cm" }, { q: "The total width of your classroom?", a: "m" },
+        { q: "The distance of an Olympic running track?", a: "m" }, { q: "The thickness of a graphite pencil?", a: "mm" },
+        { q: "The length of your longest finger?", a: "cm" }, { q: "The height of a mature kauri tree?", a: "m" }
+    ];
+
+    const mod2Data = [
+        { q: "Convert: 1m = _____ mm", a: "1000" }, { q: "Convert: 5m = _____ mm", a: "5000" }, { q: "Convert: 9m = _____ mm", a: "9000" }, { q: "Convert: 7m = _____ mm", a: "7000" }, { q: "Convert: 3m = _____ mm", a: "3000" },
+        { q: "Convert: 1m = _____ cm", a: "100" }, { q: "Convert: 3m = _____ cm", a: "300" }, { q: "Convert: 7m = _____ cm", a: "700" }, { q: "Convert: 5m = _____ cm", a: "500" }, { q: "Convert: 2m = _____ cm", a: "200" },
+        { q: "Convert: 10mm = _____ cm", a: "1" }, { q: "Convert: 40mm = _____ cm", a: "4" }, { q: "Convert: 20mm = _____ cm", a: "2" }, { q: "Convert: 90mm = _____ cm", a: "9" }, { q: "Convert: 80mm = _____ cm", a: "8" },
+        { q: "Convert: 1000m = _____ km", a: "1" }, { q: "Convert: 5000m = _____ km", a: "5" }, { q: "Convert: 2000m = _____ km", a: "2" }, { q: "Convert: 3000m = _____ km", a: "3" }, { q: "Convert: 7000m = _____ km", a: "7" }
+    ];
+
+    // Tracking history structure for individual attempts per question
+    let tracking = {
+        mod1: { questionAttempts: Array(20).fill(0), scoresPerAttempt: { 1: 0, 2: 0, 3: 0 } },
+        mod2: { questionAttempts: Array(20).fill(0), scoresPerAttempt: { 1: 0, 2: 0, 3: 0 } }
+    };
+
+    let confirmedStudentName = "";
+
+    function verifyStudentRoster() {
+        const nameInput = document.getElementById('student-name').value.trim();
+        if (nameInput.length < 2) { alert("Please type a valid name."); return; }
+        
+        if (GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_SCRIPT")) {
+            alert("Bypass Testing Mode: Paste your live Web App URL into the HTML code to unlock spreadsheet sync!");
+            confirmedStudentName = nameInput;
+            document.getElementById('signin-box').style.display = "none";
+            document.getElementById('portal-area').style.display = "block";
+            document.getElementById('card-mod1').style.display = "block";
+            document.getElementById('card-mod2').style.display = "block";
+            return;
+        }
+
+        fetch(`${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(nameInput)}`)
+        .then(res => res.json())
+        .then(res => {
+            if (!res.found) {
+                alert("Name not found on the roster. Please verify spelling or contact your tutor.");
+            } else {
+                confirmedStudentName = nameInput;
+                document.getElementById('signin-box').style.display = "none";
+                document.getElementById('portal-area').style.display = "block";
+                document.getElementById('welcome-message').innerText = `Hello ${nameInput}, welcome to your dashboard:`;
+                
+                // Linear system unlocking based on the 80% rule handled by the database
+                document.getElementById('card-mod1').style.display = res.unlockedLevel >= 1 ? "block" : "none";
+                document.getElementById('card-mod2').style.display = res.unlockedLevel >= 2 ? "block" : "none";
+            }
+        })
+        .catch(() => alert("Error authenticating profile connection."));
+    }
+
+    function openModule(modId) {
+        document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
+        document.getElementById(`view-${modId}`).classList.add('active');
+    }
+
+    function showDashboard() {
+        document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
+        document.getElementById('view-dashboard').classList.add('active');
+    }
+
+    function buildModuleQuiz(containerId, data, modId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        data.forEach((item, idx) => {
+            const row = document.createElement('div');
+            row.className = 'question-row';
+            let options = `<option value="">-- Select --</option>`;
+            if (modId === 'mod1') {
+                options += idx < 10 ? `<option value="YES">Yes, use metres</option><option value="NO">No, use another unit</option>` : `<option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option><option value="km">km</option>`;
+            } else {
+                let values = ["1", "2", "3", "4", "5", "7", "8", "9", "10", "40", "100", "200", "300", "500", "700", "1000", "2000", "3000", "5000", "7000", "9000"];
+                values.forEach(v => { options += `<option value="${v}">${v}</option>`; });
+            }
+            row.innerHTML = `<div class="question-text">${idx + 1}. ${item.q}</div><div class="question-input"><select class="quiz-select" data-index="${idx}" data-ans="${item.a}" data-mod="${modId}" onchange="gradeQuestion(this)">${options}</select><span class="feedback"></span></div>`;
+            container.appendChild(row);
+        });
+    }
+
+    function gradeQuestion(el) {
+        const selected = el.value;
+        const correct = el.getAttribute('data-ans');
+        const modId = el.getAttribute('data-mod');
+        const idx = parseInt(el.getAttribute('data-index'));
+        const feedback = el.nextElementSibling;
+        if (selected === "") return;
+
+        // Advance specific current question's try counter
+        tracking[modId].questionAttempts[idx]++;
+        let currentAttempt = tracking[modId].questionAttempts[idx];
+
+        if (selected === correct) {
+            feedback.innerHTML = "✅ Correct!";
+            feedback.style.color = "#2ecc71";
+            el.disabled = true;
+
+            // Increment specific attempt score bank based on when they got it right
+            if (currentAttempt === 1) tracking[modId].scoresPerAttempt[1]++;
+            if (currentAttempt === 2) tracking[modId].scoresPerAttempt[2]++;
+            if (currentAttempt === 3) tracking[modId].scoresPerAttempt[3]++;
+        } else {
+            if (currentAttempt >= 3) {
+                feedback.innerHTML = "❌ Locked";
+                feedback.style.color = "#e74c3c";
+                el.disabled = true;
+            } else {
+                feedback.innerHTML = `❌ Try ${currentAttempt + 1} of 3`;
+                feedback.style.color = "#f39c12";
+            }
+        }
+        calculateLiveDisplayScore(modId);
+    }
+
+    function calculateLiveDisplayScore(modId) {
+        let currentCorrectOnScreen = 0;
+        document.querySelectorAll(`#questions-${modId} select`).forEach(s => { if (s.value === s.getAttribute('data-ans')) currentCorrectOnScreen++; });
+        document.getElementById(`score-live-mod1`).innerText = `Current Correct Answers: ${currentCorrectOnScreen} / 20`;
+    }
+
+    function submitModule(modId) {
+        const btn = document.getElementById(`submit-${modId}`);
+        
+        let att1 = tracking[modId].scoresPerAttempt[1];
+        let att2 = tracking[modId].scoresPerAttempt[2];
+        let att3 = tracking[modId].scoresPerAttempt[3];
+
+        // Math logic calculating explicit historical percentage average
+        let pct1 = (att1 / 20) * 100;
+        let pct2 = (att2 / 20) * 100;
+        let pct3 = (att3 / 20) * 100;
+        let averagePercentage = Math.round((pct1 + pct2 + pct3) / 3);
+
+        let passed = averagePercentage >= 80;
+        btn.disabled = true;
+        btn.innerText = "Saving data pipeline...";
+
+        const payload = new URLSearchParams({
+            "name": confirmedStudentName,
+            "moduleName": modId === 'mod1' ? "Module 1" : "Module 2",
+            "att1": att1,
+            "att2": att2,
+            "att3": att3
+        });
+
+        fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: payload, mode: "no-cors" })
+        .then(() => {
+            if (passed) {
+                alert(`🎉 MODULE COMPLETED!\n\nAverage Score: ${averagePercentage}%\nGrade: Pass Grade Achieved!\n\nExcellent job! You have passed the 80% requirement and unlocked the next phase. Click OK to return to your dashboard.`);
+            } else {
+                alert(`⚠️ TRY AGAIN\n\nAverage Score: ${averagePercentage}%\nGrade: Review Required\n\nYou need to try the module again to hit your 80% target score. Let's practice once more!`);
+            }
+            // Reload page so their fresh level access configuration pulls immediately from sheet database
+            window.location.reload();
+        })
+        .catch(() => {
+            alert("Error sending scores to spreadsheet.");
+            btn.disabled = false;
+        });
+    }
+
+    buildModuleQuiz('questions-mod1', mod1Data, 'mod1');
+    buildModuleQuiz('questions-mod2', mod2Data, 'mod2');
+</script>
+</body>
+</html>
