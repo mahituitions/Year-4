@@ -23,7 +23,7 @@
             padding: 20px;
         }
 
-        .container { max-width: 900px; margin: 0 auto; }
+        .container { max-width: 950px; margin: 0 auto; }
 
         header {
             text-align: center;
@@ -67,7 +67,6 @@
         }
 
         .module-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .module-card h3 { margin-top: 0; color: var(--text); }
         
         .badge { background: var(--accent); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
         .view-panel { display: none; }
@@ -77,9 +76,32 @@
         .btn-login { background-color: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
 
         .instruction-box { background-color: #e8f4fd; border-left: 5px solid var(--primary); padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 0.95rem; }
-        .question-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
-        .question-text { flex: 2; font-size: 1.05rem; }
-        .question-input { flex: 1; margin-left: 20px; display: flex; align-items: center; justify-content: flex-end; }
+        
+        /* New Layout Supporting Visual Side Hints alongside clear text descriptions */
+        .question-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #eee; gap: 15px; }
+        .question-main { flex: 3; display: flex; align-items: center; gap: 15px; }
+        
+        /* Stylized CSS Picture Hint Badge Graphics */
+        .picture-hint {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+        }
+        .hint-mm { background-color: #ffeaa7; color: #d63031; border: 2px dashed #e1b12c; }
+        .hint-cm { background-color: #fab1a0; color: #e17055; border: 2px solid #e17055; }
+        .hint-m { background-color: #74b9ff; color: #0984e3; border: 2px solid #0984e3; }
+        .hint-km { background-color: #55efc4; color: #00b894; border: 2px solid #00b894; }
+        .hint-puzzle { background-color: #a29bfe; color: #6c5ce7; border: 2px double #6c5ce7; }
+
+        .question-text { font-size: 1.05rem; color: var(--text); }
+        .question-input { flex: 1; display: flex; align-items: center; justify-content: flex-end; }
         
         input.quiz-num-input { width: 120px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; text-align: center; font-size: 1rem; }
         select.quiz-select { width: 180px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
@@ -126,7 +148,7 @@
         <button class="btn-back" onclick="showDashboard()">⬅ Back to Dashboard</button>
         <div class="card">
             <h2 id="title-mod1">Module 1</h2>
-            <div class="instruction-box">Read each story carefully and pick the best matching unit of measurement!</div>
+            <div class="instruction-box">Look at the picture hints and choose the best matching unit of measurement for each question below!</div>
             <div id="questions-mod1"></div>
             <button id="submit-mod1" class="btn-submit" onclick="submitModule('mod1')">Submit Answers</button>
         </div>
@@ -136,7 +158,7 @@
         <button class="btn-back" onclick="showDashboard()">⬅ Back to Dashboard</button>
         <div class="card">
             <h2 id="title-mod2">Module 2</h2>
-            <div class="instruction-box">Solve these length puzzle conversions. Type the missing matching numbers into the boxes.</div>
+            <div class="instruction-box">Use your math puzzle logic to convert the length values. Type your final answer inside the empty boxes.</div>
             <div id="questions-mod2"></div>
             <button id="submit-mod2" class="btn-submit" onclick="submitModule('mod2')">Submit Answers</button>
         </div>
@@ -151,34 +173,31 @@
     let activeAttemptNumber = 1;
     let currentlyRenderedQuestions = []; 
 
-    // Year 4 Word-Problem Templates for Module 1
-    const mmScenarios = [
-        "A tiny ladybird is crawling across an autumn leaf. What unit should we use to find its length?",
-        "Look closely at the tip of your sharp pencil lead. Which metric unit is best for its tiny thickness?",
-        "Chloe is measuring the thickness of a single clear plastic ruler. What unit should she use?",
-        "An ant is standing on top of an apple seed. Which measurement unit best captures the ant's size?",
-        "Leo wants to measure how thick a single coin from his pocket is. What unit fits best?"
-    ];
-    const cmScenarios = [
-        "You want to find out the exact length of a brand new crayon. Which metric unit should you use?",
-        "Mia is measuring the long side of a standard A4 reading book sheet. What unit fits best?",
-        "Jack wants to see how long his new pair of scissors is. Which unit should he choose?",
-        "Think about the length of your longest finger. What unit is most practical to measure it?",
-        "Sophia wants to find the exact length of a small chocolate bar. Which metric unit is best?"
-    ];
-    const mScenarios = [
-        "Your teacher asks you to measure the distance from the front whiteboard to the back wall of the classroom. What unit is best?",
-        "Liam wants to measure the total length of the big playground slide outside. Which metric unit should he use?",
-        "A large swimming pool is used for school racing. What unit describes how long the pool lanes are?",
-        "How tall is a standard school classroom door frame? Choose the best unit to measure it.",
-        "A regular soccer or rugby field stretches far across the park. What unit matches its total length?"
-    ];
-    const kmScenarios = [
-        "An airplane flies high in the sky between two distant cities. What unit measures this trip distance?",
-        "A cross-country running path goes all the way through a forest track. What unit measures the course length?",
-        "You are going on a road trip with your family to a holiday spot hours away. What unit measures the road distance?",
-        "Imagine traveling all the way from New Zealand across the ocean to Australia. What unit fits this map distance?",
-        "A long marathon running race circles around an entire town city center. What unit describes this race?"
+    // 20 Explicitly Distinct Year 4 Questions for Module 1 (No duplicates possible)
+    const strictMod1Pool = [
+        { q: "A tiny garden ladybird is crawling across a leaf. What unit should you use to measure its tiny length?", a: "mm", type: "mm", icon: "🐞" },
+        { q: "Look closely at the very tip of a sharp writing pencil. What unit measures its small thickness?", a: "mm", type: "mm", icon: "✏️" },
+        { q: "Your teacher gives you a single clear plastic ruler. What unit is best to measure how thick the edge is?", a: "mm", type: "mm", icon: "📏" },
+        { q: "A tiny little ant is standing on top of an apple seed. Which metric unit best fits the ant's tiny body length?", a: "mm", type: "mm", icon: "🐜" },
+        { q: "You want to find out exactly how thick a single gold coin is from your piggy bank. What unit fits best?", a: "mm", type: "mm", icon: "🪙" },
+        
+        { q: "You want to measure the length of a brand new wax crayon in your art box. Which metric unit is best?", a: "cm", type: "cm", icon: "🖍️" },
+        { q: "You want to check the long side of a standard piece of A4 school notebook paper. What unit should you use?", a: "cm", type: "cm", icon: "📄" },
+        { q: "Your desk partner passes you a pair of school safety scissors. Which unit measures its length best?", a: "cm", type: "cm", icon: "✂️" },
+        { q: "Spread out your hand and look at your longest finger. What unit is most practical to measure its length?", a: "cm", type: "cm", icon: "🖐️" },
+        { q: "You have a sweet, small chocolate bar to snack on. Which metric unit is best to measure how long it is?", a: "cm", type: "cm", icon: "🍫" },
+        
+        { q: "Your coach wants you to measure the distance from the front whiteboard to the back door of your classroom. What unit is best?", a: "m", type: "m", icon: "🚪" },
+        { q: "You are standing outside next to the big playground slide. Which metric unit should be used to find its total length?", a: "m", type: "m", icon: "🛝" },
+        { q: "Imagine looking at the long swimming pool used for your school swimming sports days. What unit describes its length?", a: "m", type: "m", icon: "🏊" },
+        { q: "Look at the big, tall tree growing outside in the school courtyard. What unit is best to track its full height?", a: "m", type: "m", icon: "🌳" },
+        { q: "A massive outdoor soccer field stretches across the community park grounds. What unit matches its total length?", a: "m", type: "m", icon: "⚽" },
+        
+        { q: "An airplane travels high in the sky all the way between two far-apart capital cities. What unit measures this long trip?", a: "km", type: "km", icon: "✈️" },
+        { q: "The whole school participates in a cross-country running race track winding deep through a local forest. What unit is used?", a: "km", type: "km", icon: "🏃" },
+        { q: "Your family packs up the car for a long holiday road trip to a town hours away. What unit measures this road distance?", a: "km", type: "km", icon: "🚗" },
+        { q: "Imagine looking at a huge map showing the distance across the sea from New Zealand to Australia. What unit fits best?", a: "km", type: "km", icon: "🗺️" },
+        { q: "A giant marathon bike race travels all the way around the outside of a massive city landscape. What unit is used?", a: "km", type: "km", icon: "🚴" }
     ];
 
     function verifyStudentRoster() {
@@ -237,31 +256,20 @@
         });
     }
 
-    // Dynamic Engine generating procedurally unique tasks every single run
     function generateAndBuildQuiz(modId) {
         currentlyRenderedQuestions = [];
         const container = document.getElementById(`questions-${modId}`);
         container.innerHTML = "";
 
         if (modId === 'mod1') {
-            // Pick a completely random sample combination from our scenarios
-            let itemsPool = [];
-            
-            // Collect balanced questions
-            for(let i=0; i<5; i++) {
-                itemsPool.push({ q: mmScenarios[Math.floor(Math.random() * mmScenarios.length)], a: "mm" });
-                itemsPool.push({ q: cmScenarios[Math.floor(Math.random() * cmScenarios.length)], a: "cm" });
-                itemsPool.push({ q: mScenarios[Math.floor(Math.random() * mScenarios.length)], a: "m" });
-                itemsPool.push({ q: kmScenarios[Math.floor(Math.random() * kmScenarios.length)], a: "km" });
-            }
-
-            // Scramble completely so the answer pattern changes
-            itemsPool.sort(() => Math.random() - 0.5);
-            currentlyRenderedQuestions = itemsPool;
+            // Shuffle the 20 distinct scenarios so their order is randomized every single attempt
+            let shuffledPool = [...strictMod1Pool].sort(() => Math.random() - 0.5);
+            currentlyRenderedQuestions = shuffledPool;
 
             currentlyRenderedQuestions.forEach((item, idx) => {
                 const row = document.createElement('div');
                 row.className = 'question-row';
+                
                 let options = `
                     <option value="">-- Choose Unit --</option>
                     <option value="mm">mm (millimetre)</option>
@@ -269,63 +277,61 @@
                     <option value="m">m (metre)</option>
                     <option value="km">km (kilometre)</option>
                 `;
+
                 row.innerHTML = `
-                    <div class="question-text"><strong>Q${idx + 1}.</strong> ${item.q}</div>
+                    <div class="question-main">
+                        <div class="picture-hint hint-${item.type}">${item.icon}</div>
+                        <div class="question-text"><strong>Q${idx + 1}.</strong> ${item.q}</div>
+                    </div>
                     <div class="question-input"><select class="quiz-select">${options}</select></div>
                 `;
                 container.appendChild(row);
             });
         } else {
-            // Procedural variations generator for conversion tasks
-            let patterns = ["m_to_mm", "m_to_cm", "mm_to_cm", "m_to_km"];
-            let wordPhrases = [
-                "A long piece of blue string is exactly {X} metres long. How many millimetres is that?",
-                "An athlete jumps a distance of {X} metres. Express this jumping value in centimetres.",
-                "A ladybird crawled {X} millimetres up a garden branch. Convert this distance to centimetres.",
-                "The school running club completed a path tracking {X} metres long. How many kilometres is that?",
-                "Solve the measurement missing puzzle: {X}m = _____ cm",
-                "Fill in the empty conversion blank space: {X}mm = _____ cm",
-                "Can you change {X}m directly into millimetres?",
-                "Change this value into kilometres: {X}m"
-            ];
+            // Module 2: Generates 20 structurally unique mathematical conversion puzzles (No Duplicates)
+            let conversionTypes = ["m_to_mm", "m_to_cm", "mm_to_cm", "m_to_km"];
+            
+            // Generate non-repeating scalar factors (1 through 9, and distinct multi-values)
+            let primaryValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 20, 25, 30, 40, 50, 60, 80];
+            // Scramble value pool ahead of time so index assignment is perfectly distinct
+            primaryValues.sort(() => Math.random() - 0.5);
 
             for (let i = 0; i < 20; i++) {
-                let currentPattern = patterns[i % patterns.length];
+                let currentType = conversionTypes[i % conversionTypes.length];
+                let scalar = primaryValues[i]; // Grabs a guaranteed unique scalar factor
                 let questionText = "";
                 let correctAnswer = "";
-                let baseRand = Math.floor(Math.random() * 9) + 1; // 1 to 9
 
-                if (currentPattern === "m_to_mm") {
-                    let textTemplate = wordPhrases[Math.random() > 0.5 ? 0 : 6];
-                    questionText = textTemplate.replace("{X}", baseRand);
-                    correctAnswer = (baseRand * 1000).toString();
-                } else if (currentPattern === "m_to_cm") {
-                    let textTemplate = wordPhrases[Math.random() > 0.5 ? 1 : 4];
-                    questionText = textTemplate.replace("{X}", baseRand);
-                    correctAnswer = (baseRand * 100).toString();
-                } else if (currentPattern === "mm_to_cm") {
-                    let mmVal = baseRand * 10;
-                    let textTemplate = wordPhrases[Math.random() > 0.5 ? 2 : 5];
-                    questionText = textTemplate.replace("{X}", mmVal);
-                    correctAnswer = baseRand.toString();
-                } else if (currentPattern === "m_to_km") {
-                    let mVal = baseRand * 1000;
-                    let textTemplate = wordPhrases[Math.random() > 0.5 ? 3 : 7];
-                    questionText = textTemplate.replace("{X}", mVal);
-                    correctAnswer = baseRand.toString();
+                if (currentType === "m_to_mm") {
+                    questionText = `A length of blue string measures exactly ${scalar} metres long. How many millimetres is this?`;
+                    correctAnswer = (scalar * 1000).toString();
+                } else if (currentType === "m_to_cm") {
+                    questionText = `An athlete executes a long jump landing at ${scalar} metres. Express this distance in centimetres.`;
+                    correctAnswer = (scalar * 100).toString();
+                } else if (currentType === "mm_to_cm") {
+                    let mmVal = scalar * 10;
+                    questionText = `A ladybird crawled a total distance of ${mmVal} millimetres up a branch. How many centimetres is that?`;
+                    correctAnswer = scalar.toString();
+                } else if (currentType === "m_to_km") {
+                    let mVal = scalar * 1000;
+                    questionText = `The school running trail tracks an outdoor course exactly ${mVal} metres long. Convert this into kilometres.`;
+                    correctAnswer = scalar.toString();
                 }
 
                 currentlyRenderedQuestions.push({ q: questionText, a: correctAnswer });
             }
 
-            // Shuffle conversion puzzles
+            // Scramble layout presentation of the unique puzzles
             currentlyRenderedQuestions.sort(() => Math.random() - 0.5);
 
             currentlyRenderedQuestions.forEach((item, idx) => {
                 const row = document.createElement('div');
                 row.className = 'question-row';
                 row.innerHTML = `
-                    <div class="question-text"><strong>Q${idx + 1}.</strong> ${item.q}</div>
+                    <div class="question-main">
+                        <div class="picture-hint hint-puzzle">🧩</div>
+                        <div class="question-text"><strong>Q${idx + 1}.</strong> ${item.q}</div>
+                    </div>
                     <div class="question-input">
                         <input type="text" class="quiz-num-input" placeholder="Type number...">
                     </div>
