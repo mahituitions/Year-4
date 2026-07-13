@@ -80,6 +80,9 @@
         .question-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
         .question-text { flex: 2; font-size: 1.05rem; }
         .question-input { flex: 1; margin-left: 20px; display: flex; align-items: center; justify-content: flex-end; }
+        
+        /* Updated design for clean numeric entry */
+        input.quiz-num-input { width: 120px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; text-align: center; font-size: 1rem; }
         select.quiz-select { width: 180px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
 
         .btn-submit { background-color: var(--secondary); color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; width: 100%; margin-top: 20px; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2); }
@@ -107,12 +110,12 @@
             <h2 id="welcome-message">Your Tasks</h2>
             <div class="grid">
                 <div class="module-card" id="card-mod1" onclick="selectAndLoadModule('mod1')">
-                    <span class="badge" id="badge-mod1">Module 1</span>
+                    <span class="badge">Module 1</span>
                     <h3>Metric Units Intro</h3>
                     <p>Learn to choose standard units like mm, cm, m, and km.</p>
                 </div>
                 <div class="module-card" id="card-mod2" onclick="selectAndLoadModule('mod2')">
-                    <span class="badge" id="badge-mod2">Module 2</span>
+                    <span class="badge">Module 2</span>
                     <h3>Unit Conversions</h3>
                     <p>Master converting m to mm, m to cm, mm to cm, and m to km.</p>
                 </div>
@@ -124,7 +127,7 @@
         <button class="btn-back" onclick="showDashboard()">⬅ Back to Dashboard</button>
         <div class="card">
             <h2 id="title-mod1">Module 1</h2>
-            <div class="instruction-box">Fill in every option below to the best of your ability, then submit to check your final metrics!</div>
+            <div class="instruction-box">Answer all 20 shuffled questions below, then click submit to verify your score.</div>
             <div id="questions-mod1"></div>
             <button id="submit-mod1" class="btn-submit" onclick="submitModule('mod1')">Submit Answers</button>
         </div>
@@ -134,7 +137,7 @@
         <button class="btn-back" onclick="showDashboard()">⬅ Back to Dashboard</button>
         <div class="card">
             <h2 id="title-mod2">Module 2</h2>
-            <div class="instruction-box">Fill in every conversion value below to the best of your ability, then submit your work!</div>
+            <div class="instruction-box">Type the correct converted conversion value into each box.</div>
             <div id="questions-mod2"></div>
             <button id="submit-mod2" class="btn-submit" onclick="submitModule('mod2')">Submit Answers</button>
         </div>
@@ -142,31 +145,26 @@
 </div>
 
 <script>
-    // Paste your exact deployment Google Web App URL here
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyGpRMFtRbUyRxEnkgZXlmh6l4zo57n4nFach1Y0koFkCU_zho4VDiOAUM7qsMgvXv1/exec";
+    // Paste your updated Web App URL right here
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxuECD6Kpd7u8Z8kMROXx-Yejq_se2RDb4tyB0HFeRsjhmpsG3rAP7Md_-BDnS3L-FO/exec";
 
-    const mod1Data = [
-        { q: "The height of a school building.", a: "YES" }, { q: "The thickness of an exercise book.", a: "NO" },
-        { q: "The distance between New Zealand and Australia.", a: "NO" }, { q: "The length of a rugby field.", a: "YES" },
-        { q: "The distance of a cross-country running race.", a: "NO" }, { q: "The width of a swimming pool.", a: "YES" },
-        { q: "The length of a wooden pencil.", a: "NO" }, { q: "The height of a classroom door.", a: "YES" },
-        { q: "The distance all the way around the school grounds.", a: "NO" }, { q: "The length of a playground slide.", a: "YES" },
-        { q: "The thickness of a reading book?", a: "mm" }, { q: "The length of a soccer field?", a: "m" },
-        { q: "The distance between two far-away cities?", a: "km" }, { q: "The height of a street lamp post?", a: "m" },
-        { q: "Your exact body height?", a: "cm" }, { q: "The total width of your classroom?", a: "m" },
-        { q: "The distance of an Olympic running track?", a: "m" }, { q: "The thickness of a graphite pencil?", a: "mm" },
-        { q: "The length of your longest finger?", a: "cm" }, { q: "The height of a mature kauri tree?", a: "m" }
-    ];
-
-    const mod2Data = [
-        { q: "Convert: 1m = _____ mm", a: "1000" }, { q: "Convert: 5m = _____ mm", a: "5000" }, { q: "Convert: 9m = _____ mm", a: "9000" }, { q: "Convert: 7m = _____ mm", a: "7000" }, { q: "Convert: 3m = _____ mm", a: "3000" },
-        { q: "Convert: 1m = _____ cm", a: "100" }, { q: "Convert: 3m = _____ cm", a: "300" }, { q: "Convert: 7m = _____ cm", a: "700" }, { q: "Convert: 5m = _____ cm", a: "500" }, { q: "Convert: 2m = _____ cm", a: "200" },
-        { q: "Convert: 10mm = _____ cm", a: "1" }, { q: "Convert: 40mm = _____ cm", a: "4" }, { q: "Convert: 20mm = _____ cm", a: "2" }, { q: "Convert: 90mm = _____ cm", a: "9" }, { q: "Convert: 80mm = _____ cm", a: "8" },
-        { q: "Convert: 1000m = _____ km", a: "1" }, { q: "Convert: 5000m = _____ km", a: "5" }, { q: "Convert: 2000m = _____ km", a: "2" }, { q: "Convert: 3000m = _____ km", a: "3" }, { q: "Convert: 7000m = _____ km", a: "7" }
+    // Static pool for Module 1 (will be dynamically scrambled)
+    const baseMod1Data = [
+        { q: "The height of a school building best measured in metres?", a: "YES" }, { q: "The thickness of an exercise book best measured in metres?", a: "NO" },
+        { q: "The distance between New Zealand and Australia best measured in metres?", a: "NO" }, { q: "The length of a rugby field best measured in metres?", a: "YES" },
+        { q: "The distance of a cross-country running race best measured in metres?", a: "NO" }, { q: "The width of a swimming pool best measured in metres?", a: "YES" },
+        { q: "The length of a wooden pencil best measured in metres?", a: "NO" }, { q: "The height of a classroom door best measured in metres?", a: "YES" },
+        { q: "The distance all the way around the school grounds best measured in metres?", a: "NO" }, { q: "The height of a standard playground slide best measured in metres?", a: "YES" },
+        { q: "What is the best unit for the thickness of a reading book?", a: "mm" }, { q: "What is the best unit for the length of a soccer field?", a: "m" },
+        { q: "What is the best unit for the distance between two far-away cities?", a: "km" }, { q: "What is the best unit for the height of a street lamp post?", a: "m" },
+        { q: "What is the best unit for your exact body height?", a: "cm" }, { q: "What is the best unit for the total width of your classroom?", a: "m" },
+        { q: "What is the best unit for the distance of an Olympic running track?", a: "m" }, { q: "What is the best unit for the thickness of a graphite pencil?", a: "mm" },
+        { q: "What is the best unit for the length of your longest finger?", a: "cm" }, { q: "What is the best unit for the height of a mature kauri tree?", a: "m" }
     ];
 
     let confirmedStudentName = "";
     let activeAttemptNumber = 1;
+    let currentlyRenderedQuestions = []; // Keeps track of active scrambled order values
 
     function verifyStudentRoster() {
         const nameInput = document.getElementById('student-name').value.trim();
@@ -182,7 +180,6 @@
             return;
         }
 
-        // Standard profile validation check without setting attempt counts globally yet
         fetch(`${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(nameInput)}&module=Module 1`)
         .then(res => res.json())
         .then(res => {
@@ -197,13 +194,12 @@
                 document.getElementById('card-mod1').style.display = res.unlockedLevel >= 1 ? "block" : "none";
                 document.getElementById('card-mod2').style.display = res.unlockedLevel >= 2 ? "block" : "none";
             }
-        }).catch(() => alert("Connection error."));
+        }).catch(() => alert("Error communicating with roster dashboard."));
     }
 
     function selectAndLoadModule(modId) {
-        let textTitle = modId === 'mod1' ? "Module 1 (Units Intro)" : "Module 2 (Conversions)";
+        let textTitle = modId === 'mod1' ? "Module 1" : "Module 2";
         
-        // Dynamic attempt logic query right as they click the task card
         fetch(`${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(confirmedStudentName)}&module=${encodeURIComponent(textTitle)}`)
         .then(res => res.json())
         .then(res => {
@@ -214,15 +210,94 @@
                 return;
             }
             
-            // Set headers reflecting attempt progress
-            document.getElementById(`title-${modId}`).innerText = `${textTitle} - Attempt #${activeAttemptNumber} of 3`;
+            document.getElementById(`title-${modId}`).innerText = `${modId === 'mod1' ? "Module 1: Units Intro" : "Module 2: Length Conversions"} - Attempt #${activeAttemptNumber} of 3`;
+            
+            // Build fresh randomized test questions right when they click into it!
+            generateAndBuildQuiz(modId);
             openModule(modId);
         }).catch(() => {
-            // Safe fallback if running offline testing framework
             activeAttemptNumber = 1;
-            document.getElementById(`title-${modId}`).innerText = `${textTitle} - Attempt #1`;
+            document.getElementById(`title-${modId}`).innerText = `${textTitle} - Test Run Mode`;
+            generateAndBuildQuiz(modId);
             openModule(modId);
         });
+    }
+
+    function generateAndBuildQuiz(modId) {
+        currentlyRenderedQuestions = [];
+        const container = document.getElementById(`questions-${modId}`);
+        container.innerHTML = "";
+
+        if (modId === 'mod1') {
+            // Scramble Module 1 questions
+            let shuffled = [...baseMod1Data].sort(() => Math.random() - 0.5);
+            currentlyRenderedQuestions = shuffled;
+
+            shuffled.forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = 'question-row';
+                
+                // Keep dropdown choices simple and error-proof
+                let isYesNo = item.q.includes("best measured in metres");
+                let options = `<option value="">-- Select --</option>`;
+                if (isYesNo) {
+                    options += `<option value="YES">Yes, use metres</option><option value="NO">No, use another unit</option>`;
+                } else {
+                    options += `<option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option><option value="km">km</option>`;
+                }
+
+                row.innerHTML = `
+                    <div class="question-text">${idx + 1}. ${item.q}</div>
+                    <div class="question-input">
+                        <select class="quiz-select">${options}</select>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        } else {
+            // Procedurally generate brand-new random numbers for Module 2 every attempt!
+            let types = ["m_to_mm", "m_to_cm", "mm_to_cm", "m_to_km"];
+            
+            for (let i = 0; i < 20; i++) {
+                let currentType = types[i % types.length];
+                let questionText = "";
+                let correctAnswer = "";
+                let randomNum = Math.floor(Math.random() * 9) + 1; // Creates numbers 1 to 9
+
+                if (currentType === "m_to_mm") {
+                    questionText = `Convert: ${randomNum}m = _____ mm`;
+                    correctAnswer = (randomNum * 1000).toString();
+                } else if (currentType === "m_to_cm") {
+                    questionText = `Convert: ${randomNum}m = _____ cm`;
+                    correctAnswer = (randomNum * 100).toString();
+                } else if (currentType === "mm_to_cm") {
+                    let mmVal = randomNum * 10;
+                    questionText = `Convert: ${mmVal}mm = _____ cm`;
+                    correctAnswer = randomNum.toString();
+                } else if (currentType === "m_to_km") {
+                    let mVal = randomNum * 1000;
+                    questionText = `Convert: ${mVal}m = _____ km`;
+                    correctAnswer = randomNum.toString();
+                }
+
+                currentlyRenderedQuestions.push({ q: questionText, a: correctAnswer });
+            }
+
+            // Shuffle the generated conversion questions
+            currentlyRenderedQuestions.sort(() => Math.random() - 0.5);
+
+            currentlyRenderedQuestions.forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = 'question-row';
+                row.innerHTML = `
+                    <div class="question-text">${idx + 1}. ${item.q}</div>
+                    <div class="question-input">
+                        <input type="text" class="quiz-num-input" placeholder="Type number...">
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
     }
 
     function openModule(modId) {
@@ -233,25 +308,7 @@
     function showDashboard() {
         document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
         document.getElementById('view-dashboard').classList.add('active');
-        verifyStudentRoster(); // Reload dashboard settings cleanly
-    }
-
-    function buildModuleQuiz(containerId, data, modId) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        data.forEach((item, idx) => {
-            const row = document.createElement('div');
-            row.className = 'question-row';
-            let options = `<option value="">-- Select --</option>`;
-            if (modId === 'mod1') {
-                options += idx < 10 ? `<option value="YES">Yes, use metres</option><option value="NO">No, use another unit</option>` : `<option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option><option value="km">km</option>`;
-            } else {
-                let values = ["1", "2", "3", "4", "5", "7", "8", "9", "10", "40", "100", "200", "300", "500", "700", "1000", "2000", "3000", "5000", "7000", "9000"];
-                values.forEach(v => { options += `<option value="${v}">${v}</option>`; });
-            }
-            row.innerHTML = `<div class="question-text">${idx + 1}. ${item.q}</div><div class="question-input"><select class="quiz-select" data-ans="${item.a}">${options}</select></div>`;
-            container.appendChild(row);
-        });
+        verifyStudentRoster(); // Auto-reloads fresh dashboard profile configs
     }
 
     function submitModule(modId) {
@@ -261,19 +318,27 @@
         let correctAnswersCount = 0;
         let unansweredFound = false;
 
-        document.querySelectorAll(`#questions-${modId} select`).forEach(s => {
-            if (s.value === "") unansweredFound = true;
-            if (s.value === s.getAttribute('data-ans')) correctAnswersCount++;
+        // Extract student inputs cleanly depending on the active input layout
+        const inputs = document.querySelectorAll(`#questions-${modId} .quiz-select, #questions-${modId} .quiz-num-input`);
+        
+        inputs.forEach((input, idx) => {
+            let studentValue = input.value.trim();
+            if (studentValue === "") unansweredFound = true;
+            
+            let targetAnswer = currentlyRenderedQuestions[idx].a;
+            if (studentValue.toLowerCase() === targetAnswer.toLowerCase()) {
+                correctAnswersCount++;
+            }
         });
 
         if (unansweredFound) {
-            alert("Please select an answer for all 20 questions before submitting!");
+            alert("Please answer all 20 questions before submitting your test paper!");
             return;
         }
 
         let scorePercentage = Math.round((correctAnswersCount / 20) * 100);
         btn.disabled = true;
-        btn.innerText = "Submitting answers...";
+        btn.innerText = "Transmitting scores...";
 
         const payload = new URLSearchParams({
             "name": confirmedStudentName,
@@ -285,26 +350,25 @@
         fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: payload, mode: "no-cors" })
         .then(() => {
             if (scorePercentage >= 80) {
-                alert(`🎉 PASS SCORE: ${scorePercentage}%\n\nFantastic job! You scored ${correctAnswersCount}/20. You have cleared the 80% rule and unlocked the next steps.`);
+                alert(`🎉 PASS RECORDED: ${scorePercentage}%\n\nWonderful work! You scored ${correctAnswersCount}/20.\nThis clears your 80% progression rule!`);
                 showDashboard();
             } else {
                 if (activeAttemptNumber >= 3) {
-                    alert(`⛔ ATTEMPT LIMIT REACHED: ${scorePercentage}%\n\nYou have finished all 3 attempts. Your score is saved. Please ask your tutor for support to guide you through these questions!`);
+                    alert(`⛔ ATTEMPT LIMIT REACHED: ${scorePercentage}%\n\nYou scored ${correctAnswersCount}/20. You have used all 3 attempts. Please ask your tutor for help to review this topic together!`);
                 } else {
-                    alert(`⚠️ TRY AGAIN: ${scorePercentage}%\n\nYou scored ${correctAnswersCount}/20. You need to try the module again because the passing rule is 80%. Let's review the questions on your next attempt!`);
+                    alert(`⚠️ RETRY MODULE: ${scorePercentage}%\n\nYou scored ${correctAnswersCount}/20. Since the passing rule is 80%, you will need to try this module again with a new set of questions!`);
                 }
                 showDashboard();
             }
+            btn.disabled = false;
+            btn.innerText = "Submit Answers";
         })
         .catch(() => {
-            alert("Error updating student tracking database.");
+            alert("Data pipeline communication error.");
             btn.disabled = false;
             btn.innerText = "Submit Answers";
         });
     }
-
-    buildModuleQuiz('questions-mod1', mod1Data, 'mod1');
-    buildModuleQuiz('questions-mod2', mod2Data, 'mod2');
 </script>
 </body>
 </html>
