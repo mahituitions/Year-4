@@ -82,10 +82,7 @@
         .question-input { flex: 1; margin-left: 20px; display: flex; align-items: center; justify-content: flex-end; }
         select.quiz-select { width: 180px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
 
-        .feedback { margin-left: 10px; font-size: 1rem; display: inline-block; width: 110px; text-align: left; font-weight: bold; }
-        .score-banner { background: #f1f2f6; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 1.1rem; font-weight: bold; color: var(--primary); display: flex; flex-direction: column; gap: 5px; }
         .btn-submit { background-color: var(--secondary); color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; width: 100%; margin-top: 20px; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2); }
-        .btn-submit:disabled { background-color: #bdc3c7; cursor: not-allowed; box-shadow: none; }
     </style>
 </head>
 <body>
@@ -109,13 +106,13 @@
         <div id="portal-area" style="display: none;">
             <h2 id="welcome-message">Your Tasks</h2>
             <div class="grid">
-                <div class="module-card" id="card-mod1" onclick="openModule('mod1')">
-                    <span class="badge">Module 1</span>
+                <div class="module-card" id="card-mod1" onclick="selectAndLoadModule('mod1')">
+                    <span class="badge" id="badge-mod1">Module 1</span>
                     <h3>Metric Units Intro</h3>
                     <p>Learn to choose standard units like mm, cm, m, and km.</p>
                 </div>
-                <div class="module-card" id="card-mod2" onclick="openModule('mod2')">
-                    <span class="badge">Module 2</span>
+                <div class="module-card" id="card-mod2" onclick="selectAndLoadModule('mod2')">
+                    <span class="badge" id="badge-mod2">Module 2</span>
                     <h3>Unit Conversions</h3>
                     <p>Master converting m to mm, m to cm, mm to cm, and m to km.</p>
                 </div>
@@ -126,33 +123,27 @@
     <div id="view-mod1" class="view-panel">
         <button class="btn-back" onclick="showDashboard()">⬅ Back to Dashboard</button>
         <div class="card">
-            <h2>Module 1: Metric Units Selection</h2>
-            <div class="instruction-box">Complete the challenge by picking the most accurate length unit. <strong>Max 3 attempts per question!</strong></div>
+            <h2 id="title-mod1">Module 1</h2>
+            <div class="instruction-box">Fill in every option below to the best of your ability, then submit to check your final metrics!</div>
             <div id="questions-mod1"></div>
-            <div class="score-banner">
-                <span id="score-live-mod1">Current Correct Answers: 0 / 20</span>
-            </div>
-            <button id="submit-mod1" class="btn-submit" onclick="submitModule('mod1')">Submit Module 1 Scores</button>
+            <button id="submit-mod1" class="btn-submit" onclick="submitModule('mod1')">Submit Answers</button>
         </div>
     </div>
 
     <div id="view-mod2" class="view-panel">
         <button class="btn-back" onclick="showDashboard()">⬅ Back to Dashboard</button>
         <div class="card">
-            <h2>Module 2: Length Conversions</h2>
-            <div class="instruction-box">Convert between metric length units. <strong>Max 3 attempts per question!</strong></div>
+            <h2 id="title-mod2">Module 2</h2>
+            <div class="instruction-box">Fill in every conversion value below to the best of your ability, then submit your work!</div>
             <div id="questions-mod2"></div>
-            <div class="score-banner">
-                <span id="score-live-mod2">Current Correct Answers: 0 / 20</span>
-            </div>
-            <button id="submit-mod2" class="btn-submit" onclick="submitModule('mod2')">Submit Module 2 Scores</button>
+            <button id="submit-mod2" class="btn-submit" onclick="submitModule('mod2')">Submit Answers</button>
         </div>
     </div>
 </div>
 
 <script>
-    // CRITICAL: Replace this text string with your exact Google Web App URL 
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDoZZzIzo1oudUhEkkL2Dtk-ZbackjkbRmdQX7qeDqUrURtlfyjJyQR6K1-P056kp8/exec";
+    // Paste your exact deployment Google Web App URL here
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyGpRMFtRbUyRxEnkgZXlmh6l4zo57n4nFach1Y0koFkCU_zho4VDiOAUM7qsMgvXv1/exec";
 
     const mod1Data = [
         { q: "The height of a school building.", a: "YES" }, { q: "The thickness of an exercise book.", a: "NO" },
@@ -174,20 +165,15 @@
         { q: "Convert: 1000m = _____ km", a: "1" }, { q: "Convert: 5000m = _____ km", a: "5" }, { q: "Convert: 2000m = _____ km", a: "2" }, { q: "Convert: 3000m = _____ km", a: "3" }, { q: "Convert: 7000m = _____ km", a: "7" }
     ];
 
-    // Tracking history structure for individual attempts per question
-    let tracking = {
-        mod1: { questionAttempts: Array(20).fill(0), scoresPerAttempt: { 1: 0, 2: 0, 3: 0 } },
-        mod2: { questionAttempts: Array(20).fill(0), scoresPerAttempt: { 1: 0, 2: 0, 3: 0 } }
-    };
-
     let confirmedStudentName = "";
+    let activeAttemptNumber = 1;
 
     function verifyStudentRoster() {
         const nameInput = document.getElementById('student-name').value.trim();
         if (nameInput.length < 2) { alert("Please type a valid name."); return; }
         
         if (GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_SCRIPT")) {
-            alert("Bypass Testing Mode: Paste your live Web App URL into the HTML code to unlock spreadsheet sync!");
+            alert("Bypass Testing Mode active.");
             confirmedStudentName = nameInput;
             document.getElementById('signin-box').style.display = "none";
             document.getElementById('portal-area').style.display = "block";
@@ -196,23 +182,47 @@
             return;
         }
 
-        fetch(`${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(nameInput)}`)
+        // Standard profile validation check without setting attempt counts globally yet
+        fetch(`${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(nameInput)}&module=Module 1`)
         .then(res => res.json())
         .then(res => {
             if (!res.found) {
-                alert("Name not found on the roster. Please verify spelling or contact your tutor.");
+                alert("Name not found on the roster.");
             } else {
                 confirmedStudentName = nameInput;
                 document.getElementById('signin-box').style.display = "none";
                 document.getElementById('portal-area').style.display = "block";
-                document.getElementById('welcome-message').innerText = `Hello ${nameInput}, welcome to your dashboard:`;
+                document.getElementById('welcome-message').innerText = `Hello ${nameInput}, select an assigned task card below:`;
                 
-                // Linear system unlocking based on the 80% rule handled by the database
                 document.getElementById('card-mod1').style.display = res.unlockedLevel >= 1 ? "block" : "none";
                 document.getElementById('card-mod2').style.display = res.unlockedLevel >= 2 ? "block" : "none";
             }
-        })
-        .catch(() => alert("Error authenticating profile connection."));
+        }).catch(() => alert("Connection error."));
+    }
+
+    function selectAndLoadModule(modId) {
+        let textTitle = modId === 'mod1' ? "Module 1 (Units Intro)" : "Module 2 (Conversions)";
+        
+        // Dynamic attempt logic query right as they click the task card
+        fetch(`${GOOGLE_SCRIPT_URL}?name=${encodeURIComponent(confirmedStudentName)}&module=${encodeURIComponent(textTitle)}`)
+        .then(res => res.json())
+        .then(res => {
+            activeAttemptNumber = res.nextAttemptToRun;
+            
+            if (activeAttemptNumber > 3) {
+                alert("⛔ Maximum limit reached. You have already completed 3 attempts for this module. Please talk to your tutor for help!");
+                return;
+            }
+            
+            // Set headers reflecting attempt progress
+            document.getElementById(`title-${modId}`).innerText = `${textTitle} - Attempt #${activeAttemptNumber} of 3`;
+            openModule(modId);
+        }).catch(() => {
+            // Safe fallback if running offline testing framework
+            activeAttemptNumber = 1;
+            document.getElementById(`title-${modId}`).innerText = `${textTitle} - Attempt #1`;
+            openModule(modId);
+        });
     }
 
     function openModule(modId) {
@@ -223,6 +233,7 @@
     function showDashboard() {
         document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
         document.getElementById('view-dashboard').classList.add('active');
+        verifyStudentRoster(); // Reload dashboard settings cleanly
     }
 
     function buildModuleQuiz(containerId, data, modId) {
@@ -238,89 +249,57 @@
                 let values = ["1", "2", "3", "4", "5", "7", "8", "9", "10", "40", "100", "200", "300", "500", "700", "1000", "2000", "3000", "5000", "7000", "9000"];
                 values.forEach(v => { options += `<option value="${v}">${v}</option>`; });
             }
-            row.innerHTML = `<div class="question-text">${idx + 1}. ${item.q}</div><div class="question-input"><select class="quiz-select" data-index="${idx}" data-ans="${item.a}" data-mod="${modId}" onchange="gradeQuestion(this)">${options}</select><span class="feedback"></span></div>`;
+            row.innerHTML = `<div class="question-text">${idx + 1}. ${item.q}</div><div class="question-input"><select class="quiz-select" data-ans="${item.a}">${options}</select></div>`;
             container.appendChild(row);
         });
     }
 
-    function gradeQuestion(el) {
-        const selected = el.value;
-        const correct = el.getAttribute('data-ans');
-        const modId = el.getAttribute('data-mod');
-        const idx = parseInt(el.getAttribute('data-index'));
-        const feedback = el.nextElementSibling;
-        if (selected === "") return;
-
-        // Advance specific current question's try counter
-        tracking[modId].questionAttempts[idx]++;
-        let currentAttempt = tracking[modId].questionAttempts[idx];
-
-        if (selected === correct) {
-            feedback.innerHTML = "✅ Correct!";
-            feedback.style.color = "#2ecc71";
-            el.disabled = true;
-
-            // Increment specific attempt score bank based on when they got it right
-            if (currentAttempt === 1) tracking[modId].scoresPerAttempt[1]++;
-            if (currentAttempt === 2) tracking[modId].scoresPerAttempt[2]++;
-            if (currentAttempt === 3) tracking[modId].scoresPerAttempt[3]++;
-        } else {
-            if (currentAttempt >= 3) {
-                feedback.innerHTML = "❌ Locked";
-                feedback.style.color = "#e74c3c";
-                el.disabled = true;
-            } else {
-                feedback.innerHTML = `❌ Try ${currentAttempt + 1} of 3`;
-                feedback.style.color = "#f39c12";
-            }
-        }
-        calculateLiveDisplayScore(modId);
-    }
-
-    function calculateLiveDisplayScore(modId) {
-        let currentCorrectOnScreen = 0;
-        document.querySelectorAll(`#questions-${modId} select`).forEach(s => { if (s.value === s.getAttribute('data-ans')) currentCorrectOnScreen++; });
-        document.getElementById(`score-live-mod1`).innerText = `Current Correct Answers: ${currentCorrectOnScreen} / 20`;
-    }
-
     function submitModule(modId) {
         const btn = document.getElementById(`submit-${modId}`);
+        let moduleNameText = modId === 'mod1' ? "Module 1" : "Module 2";
         
-        let att1 = tracking[modId].scoresPerAttempt[1];
-        let att2 = tracking[modId].scoresPerAttempt[2];
-        let att3 = tracking[modId].scoresPerAttempt[3];
+        let correctAnswersCount = 0;
+        let unansweredFound = false;
 
-        // Math logic calculating explicit historical percentage average
-        let pct1 = (att1 / 20) * 100;
-        let pct2 = (att2 / 20) * 100;
-        let pct3 = (att3 / 20) * 100;
-        let averagePercentage = Math.round((pct1 + pct2 + pct3) / 3);
+        document.querySelectorAll(`#questions-${modId} select`).forEach(s => {
+            if (s.value === "") unansweredFound = true;
+            if (s.value === s.getAttribute('data-ans')) correctAnswersCount++;
+        });
 
-        let passed = averagePercentage >= 80;
+        if (unansweredFound) {
+            alert("Please select an answer for all 20 questions before submitting!");
+            return;
+        }
+
+        let scorePercentage = Math.round((correctAnswersCount / 20) * 100);
         btn.disabled = true;
-        btn.innerText = "Saving data pipeline...";
+        btn.innerText = "Submitting answers...";
 
         const payload = new URLSearchParams({
             "name": confirmedStudentName,
-            "moduleName": modId === 'mod1' ? "Module 1" : "Module 2",
-            "att1": att1,
-            "att2": att2,
-            "att3": att3
+            "moduleName": moduleNameText,
+            "attemptNumber": activeAttemptNumber,
+            "score": correctAnswersCount
         });
 
         fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: payload, mode: "no-cors" })
         .then(() => {
-            if (passed) {
-                alert(`🎉 MODULE COMPLETED!\n\nAverage Score: ${averagePercentage}%\nGrade: Pass Grade Achieved!\n\nExcellent job! You have passed the 80% requirement and unlocked the next phase. Click OK to return to your dashboard.`);
+            if (scorePercentage >= 80) {
+                alert(`🎉 PASS SCORE: ${scorePercentage}%\n\nFantastic job! You scored ${correctAnswersCount}/20. You have cleared the 80% rule and unlocked the next steps.`);
+                showDashboard();
             } else {
-                alert(`⚠️ TRY AGAIN\n\nAverage Score: ${averagePercentage}%\nGrade: Review Required\n\nYou need to try the module again to hit your 80% target score. Let's practice once more!`);
+                if (activeAttemptNumber >= 3) {
+                    alert(`⛔ ATTEMPT LIMIT REACHED: ${scorePercentage}%\n\nYou have finished all 3 attempts. Your score is saved. Please ask your tutor for support to guide you through these questions!`);
+                } else {
+                    alert(`⚠️ TRY AGAIN: ${scorePercentage}%\n\nYou scored ${correctAnswersCount}/20. You need to try the module again because the passing rule is 80%. Let's review the questions on your next attempt!`);
+                }
+                showDashboard();
             }
-            // Reload page so their fresh level access configuration pulls immediately from sheet database
-            window.location.reload();
         })
         .catch(() => {
-            alert("Error sending scores to spreadsheet.");
+            alert("Error updating student tracking database.");
             btn.disabled = false;
+            btn.innerText = "Submit Answers";
         });
     }
 
